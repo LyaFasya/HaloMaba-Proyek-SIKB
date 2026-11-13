@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.routes.js"
 import profileRoutes from "./routes/profile.routes.js"
 import journeyRoutes from "./routes/journey.routes.js"
+import { listPrograms } from "./models/catalog.model.js"
 import documentsRoutes from "./routes/documents.routes.js"
 import { createChatRoutes } from "./routes/chat.routes.js"
 import { createNovaClient } from "./services/gradio.service.js"
@@ -35,6 +36,7 @@ export function createApp({
   app.use("/api/profile", profileRoutes)
   app.use("/api/journey", journeyRoutes)
   app.use("/api/documents", documentsRoutes)
+  app.get("/api/study-programs", async (_req, res) => res.json({ programs: await listPrograms() }))
   app.use("/api/chat", createChatRoutes(askNova))
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "Endpoint tidak ditemukan." }),

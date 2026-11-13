@@ -24,7 +24,7 @@ export async function login(req, res) {
     return res.status(400).json({ error: "Isi email dan password yang valid." })
   }
 
-  const account = findAccountByEmail(email.trim().toLowerCase())
+  const account = await findAccountByEmail(email.trim().toLowerCase())
   const [salt, storedHash] = (account?.password_hash ?? fallbackHash).split(":")
   const inputHash = await hashPassword(password, salt, 64)
   const matches = timingSafeEqual(inputHash, Buffer.from(storedHash, "hex"))
@@ -33,18 +33,18 @@ export async function login(req, res) {
     return res.status(401).json({ error: "Email atau password salah." })
   }
 
-  const token = createSession(account.id)
-  deleteSession(req.cookies[sessionCookie])
+  const token = await createSession(account.id)
+  await deleteSession(req.cookies[sessionCookie])
   res.cookie(sessionCookie, token, { ...cookieOptions, maxAge: sessionMaxAge })
-  return res.json({ user: findUserById(account.id) })
+  return res.json({ user: await findUserById(account.id) })
 }
 
-export function me(req, res) {
-  return res.json({ user: findUserById(req.accountId) })
+export async function me(req, res) {
+  return res.json({ user: await findUserById(req.accountId) })
 }
 
-export function logout(req, res) {
-  deleteSession(req.cookies[sessionCookie])
+export async function logout(req, res) {
+  await deleteSession(req.cookies[sessionCookie])
   res.clearCookie(sessionCookie, cookieOptions)
   return res.status(204).end()
 }

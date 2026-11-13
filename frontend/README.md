@@ -4,7 +4,7 @@ Frontend HaloMaba memakai React, JavaScript, Vite, Tailwind CSS, dan stylesheet 
 
 ## Jalankan di Mac
 
-Dari folder yang berisi `frontend` dan `backend`, buka dua terminal.
+Siapkan MySQL dan jalankan `npm run db:init` sesuai [panduan proyek](../README.md). Dari folder yang berisi `frontend` dan `backend`, buka dua terminal.
 
 **Terminal backend**
 
@@ -21,7 +21,7 @@ npm ci
 npm run dev
 ```
 
-Buka [HaloMaba](http://localhost:8443). Vite meneruskan `/api` ke backend pada port 3000 saat pengembangan. Cek sambungan di [API health lewat Vite](http://localhost:8443/api/health). Untuk login, gunakan akun yang ada di SQLite backend.
+Buka [HaloMaba](http://localhost:8443). Vite meneruskan `/api` ke backend pada port 3000 saat pengembangan. Cek sambungan di [API health lewat Vite](http://localhost:8443/api/health). Untuk login, gunakan akun yang ada di MySQL backend.
 
 ## Struktur `src/`
 

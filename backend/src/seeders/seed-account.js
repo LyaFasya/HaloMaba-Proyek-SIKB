@@ -24,9 +24,9 @@ try {
   } else {
     const salt = randomBytes(16).toString("hex")
     const hash = scryptSync(password, salt, 64).toString("hex")
-    const created = insertAccount(email, `${salt}:${hash}`, fullName)
+    const created = await insertAccount(email, `${salt}:${hash}`, fullName)
     console.log(created ? `Akun uji dibuat: ${email}` : "Akun uji sudah ada.")
   }
 } finally {
-  db.close()
+  await db.end()
 }

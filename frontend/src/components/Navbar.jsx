@@ -17,11 +17,16 @@ export default function Navbar({
       <nav aria-label="Menu utama">
         {(
           profile
-            ? [["beranda", "Beranda"], ["journey", "My Journey"], ["panduan", "Panduan"]]
+            ? [
+                ["beranda", "Beranda"],
+                ["journey", "My Journey"],
+                ["panduan", "Panduan"],
+              ]
             : [["beranda", "Beranda"]]
         ).map(([id, label]) => (
           <button
             className={page === id ? "active" : ""}
+            aria-current={page === id ? "page" : undefined}
             key={id}
             onClick={() => navigate(id)}
           >

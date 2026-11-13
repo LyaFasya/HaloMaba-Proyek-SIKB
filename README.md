@@ -10,21 +10,30 @@ HaloMaba adalah portal orientasi untuk mahasiswa baru Fakultas Ilmu Komputer Uni
 | **My Journey** | Menandai langkah persiapan seperti daftar ulang, aktivasi akun kampus, orientasi, dan persiapan kuliah. Progres tersimpan di akun. |
 | **Panduan** | Membaca PDF orientasi dan akademik langsung di halaman. Pratinjau mengikuti izin akses file di Google Drive. |
 | **Tanya NOVA** | Bertanya tentang persiapan kuliah dan informasi FILKOM. Jawaban yang memiliki rujukan menampilkan tombol **Lihat sumber**. Riwayat menyimpan 50 pertanyaan terbaru per akun di browser yang sama. |
-| **Profil** | Melihat dan memperbarui data akun mahasiswa. |
+| **Profil** | Melihat dan memperbarui profil. Mahasiswa bisa mengisi NIM sekali saat masih kosong. |
 
 My Journey, Panduan, Tanya NOVA, dan Profil memerlukan login. Jika pengunjung memilih fitur tersebut dari Beranda, HaloMaba akan membuka halaman login lalu melanjutkan ke fitur yang dipilih setelah berhasil masuk.
 
 ## Teknologi
 
 - **Frontend** — React, JavaScript, Vite, dan Tailwind CSS.
-- **Backend** — Node.js, Express, dan SQLite.
+- **Backend** — Node.js, Express, dan MySQL 8.4.
 - **AI** — NOVA menggunakan RAG dan model Qwen di Google Colab. Backend Express mengirim pertanyaan ke Gradio, lalu meneruskan jawaban dan sumber ke frontend.
 
 ## Menjalankan proyek secara lokal
 
-Siapkan **Node.js 24** dan **npm**. Setelah clone repository, buka folder proyek di VS Code. Jalankan backend dan frontend di dua terminal terpisah.
+Siapkan **Node.js 24**, **npm**, dan server **MySQL 8.4**. Setelah clone repository, buka folder proyek di VS Code. Jalankan backend dan frontend di dua terminal terpisah.
 
-### 1. Jalankan backend
+### 1. Siapkan MySQL dan jalankan backend
+
+Hubungkan MySQL Workbench atau terminal MySQL ke server lokal sebagai admin.
+Buat database dan akun khusus HaloMaba. Ganti password contoh dengan password pilihanmu.
+
+```sql
+CREATE DATABASE IF NOT EXISTS halomaba CHARACTER SET utf8mb4;
+CREATE USER 'halomaba'@'127.0.0.1' IDENTIFIED BY 'GantiDenganPasswordLokal';
+GRANT ALL PRIVILEGES ON halomaba.* TO 'halomaba'@'127.0.0.1';
+```
 
 Dari folder utama proyek, jalankan:
 
@@ -32,6 +41,12 @@ Dari folder utama proyek, jalankan:
 cd backend
 npm ci
 cp -n .env.example .env
+```
+
+Isi `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, dan `DB_NAME` di `backend/.env`. Gunakan port server MySQL milikmu. Jika sudah punya `.env`, tambahkan pengaturan `DB_*` dengan tetap memakai konfigurasi Gradio dan akun yang sudah ada.
+
+```bash
+npm run db:init
 npm run dev
 ```
 
@@ -51,7 +66,15 @@ Buka [HaloMaba](http://localhost:8443). Vite meneruskan request `/api` ke backen
 
 ### 3. Buat akun lokal
 
-Jika baru pertama kali menjalankan proyek, isi `ACCOUNT_EMAIL` dan `ACCOUNT_FULL_NAME` di `backend/.env` dengan email dan nama yang ingin dipakai. Buka terminal tambahan dari folder utama proyek. Pada macOS dengan shell zsh, jalankan:
+Jika sudah punya akun dan progres dari SQLite, hentikan backend lama, simpan cadangan `backend/data/halomaba.sqlite`, lalu jalankan perintah berikut dari folder `backend` setelah `npm run db:init`. Pastikan tabel `accounts` di MySQL masih kosong.
+
+```bash
+npm run db:migrate
+```
+
+Migrasi membawa ID akun, profil, hash password, dan checkpoint. File SQLite sumber hanya dibaca. Masuk kembali dengan email dan password lama setelah backend MySQL berjalan.
+
+Untuk instalasi baru tanpa data yang akan dimigrasikan, isi `ACCOUNT_EMAIL` dan `ACCOUNT_FULL_NAME` di `backend/.env` dengan email dan nama yang ingin dipakai. Buka terminal tambahan dari folder utama proyek. Pada macOS dengan shell zsh, jalankan:
 
 ```zsh
 cd backend
@@ -75,7 +98,11 @@ Beranda, login, My Journey, dan Panduan bisa dicoba sebelum Gradio dinyalakan. S
 
 | Folder | Isi |
 | --- | --- |
-| `backend/` | API Express, autentikasi berbasis sesi, penyimpanan SQLite, dan integrasi Gradio. |
+| `backend/` | API Express, autentikasi berbasis sesi, penyimpanan MySQL, dan integrasi Gradio. |
 | `frontend/` | Halaman React, komponen antarmuka, dan konfigurasi Vite. |
 
-File `backend/.env` dan database `backend/data/halomaba.sqlite` dibuat secara lokal. Gunakan `backend/.env.example` sebagai template konfigurasi.
+Gunakan `backend/.env.example` sebagai template konfigurasi lokal. Setelah migrasi, SQLite hanya dipakai sebagai sumber impor.
+
+## NIM
+
+Di halaman **Profil Saya**, klik **Isi NIM** saat kolom masih kosong. Simpan 15 digit yang sesuai dengan kartu mahasiswa atau SIAM. Endpoint `PUT /api/profile/nim` menerima `{ "nim": "..." }` melalui sesi yang aktif. Backend menolak NIM yang sudah dipakai akun lain atau percobaan mengubah NIM yang sudah tersimpan.

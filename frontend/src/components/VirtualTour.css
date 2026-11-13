@@ -1,0 +1,58 @@
+.home-tour {
+  margin-top: 34px;
+  padding: clamp(14px, 3vw, 26px);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper);
+}
+
+.home-tour-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.home-tour-heading h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(23px, 3vw, 33px);
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+
+.home-tour-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.home-tour-badge {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--blue-soft);
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.home-tour-frame {
+  display: block;
+  width: 100%;
+  height: clamp(340px, 52vw, 600px);
+  border: 0;
+  border-radius: 14px;
+  background: var(--navy-dark);
+}
+
+.home-tour-source {
+  margin: 11px 0 0;
+  font-size: 13px;
+}
+
+.home-tour-source a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

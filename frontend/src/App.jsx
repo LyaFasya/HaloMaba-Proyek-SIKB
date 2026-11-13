@@ -163,12 +163,9 @@ export default function App() {
     }
   }
 
-  async function saveProfile(fields) {
+  async function updateAccount(path, method, body) {
     try {
-      const { user } = await api("/profile", {
-        method: "PATCH",
-        body: fields,
-      })
+      const { user } = await api(path, { method, body })
 
       setAccount((current) =>
         current?.profile.id === user.id ? { ...current, profile: user } : current,
@@ -178,6 +175,9 @@ export default function App() {
       else throw error
     }
   }
+
+  const saveProfile = (fields) => updateAccount("/profile", "PATCH", fields)
+  const saveNim = (nim) => updateAccount("/profile/nim", "PUT", { nim })
 
   async function logout() {
     await api("/auth/logout", { method: "POST", body: {} })
@@ -225,7 +225,7 @@ export default function App() {
         )}
 
         {page === "profil" && profile && (
-          <ProfilePage {...{ profile, complete, saveProfile, logout, navigate }} />
+          <ProfilePage {...{ profile, complete, saveProfile, saveNim, logout, navigate }} />
         )}
       </main>
 

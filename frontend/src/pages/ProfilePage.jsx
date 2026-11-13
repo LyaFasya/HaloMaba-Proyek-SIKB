@@ -6,10 +6,12 @@ export default function ProfilePage({
   profile,
   complete,
   saveProfile,
+  saveNim,
   logout,
   navigate,
 }) {
   const [editing, setEditing] = useState(false)
+  const [addingNim, setAddingNim] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState("")
   const selectedProgram = programs.find(
@@ -41,6 +43,15 @@ export default function ProfilePage({
       setEditing(false)
     })
   }
+  const submitNim = (event) => {
+    event.preventDefault()
+    const { nim } = Object.fromEntries(new FormData(event.currentTarget))
+    runAction(async () => {
+      await saveNim(nim)
+      setAddingNim(false)
+    })
+  }
+
   return (
     <div className="page account-page profile-page">
       <div className="account-page-heading">
@@ -65,10 +76,6 @@ export default function ProfilePage({
       )}
       <div className="profile-layout">
         <section className="profile-main-card">
-          <div className="profile-cover">
-            <span className="cover-spark one">✦</span>
-            <span className="cover-spark two">✧</span>
-          </div>
           <div className="profile-person">
             <span className="account-avatar">{initials}</span>
             <div>
@@ -77,7 +84,11 @@ export default function ProfilePage({
             </div>
             <button
               className="secondary-button"
-              onClick={() => setEditing((value) => !value)}
+              disabled={pending}
+              onClick={() => {
+                setError("")
+                setEditing((value) => !value)
+              }}
             >
               {editing ? "Tutup edit" : "Edit profil"}
             </button>
@@ -94,14 +105,10 @@ export default function ProfilePage({
                 <dd>{profile.cohort || "Belum diisi"}</dd>
               </div>
               <div>
-                <dt>NIM</dt>
-                <dd>Belum terhubung</dd>
-              </div>
-              <div>
                 <dt>Email akun</dt>
                 <dd>{profile.email}</dd>
               </div>
-              <div className="wide">
+              <div>
                 <dt>Fakultas</dt>
                 <dd>Ilmu Komputer, Universitas Brawijaya</dd>
               </div>
@@ -172,6 +179,49 @@ export default function ProfilePage({
               </div>
             </form>
           )}
+
+          <section className="profile-nim">
+            <div>
+              <h3>Nomor Induk Mahasiswa (NIM)</h3>
+              <p>{profile.nim || "Belum diisi"}</p>
+            </div>
+            {profile.nim ? (
+              <span className="profile-nim-status">Terkunci</span>
+            ) : !addingNim && (
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  setError("")
+                  setAddingNim(true)
+                }}
+              >
+                Isi NIM
+              </button>
+            )}
+            {addingNim && !profile.nim && (
+              <form className="account-form profile-nim-form" onSubmit={submitNim}>
+                <label>
+                  NIM
+                  <input
+                    name="nim"
+                    inputMode="numeric"
+                    pattern="[0-9]{15}"
+                    maxLength={15}
+                    required
+                    autoFocus
+                    aria-describedby="nim-help"
+                  />
+                </label>
+                <p id="nim-help">Masukkan 15 digit sesuai kartu mahasiswa atau SIAM. Pastikan sudah benar karena NIM terkunci setelah disimpan.</p>
+                <div className="profile-edit-actions">
+                  <button className="primary-button" type="submit" disabled={pending}>Simpan NIM</button>
+                  <button className="ghost-button" type="button" disabled={pending} onClick={() => setAddingNim(false)}>Batal</button>
+                </div>
+              </form>
+            )}
+          </section>
         </section>
 
         <aside className="profile-side">

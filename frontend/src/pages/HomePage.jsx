@@ -1,4 +1,5 @@
 import Icon from "../components/Icon"
+import VirtualTour from "../components/VirtualTour"
 import Robot from "../components/Robot"
 import { guides, programs } from "../data"
 
@@ -216,6 +217,8 @@ export default function HomePage({
           </button>
         </article>
       </section>
+
+      <VirtualTour />
     </div>
   )
 }

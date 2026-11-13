@@ -1,8 +1,8 @@
 import { Router } from "express"
-import { documents } from "../data/documents.js"
+import { listDocuments } from "../models/catalog.model.js"
 import { requireAuth } from "../middlewares/requireAuth.js"
 
 const router = Router()
-router.get("/", requireAuth, (_req, res) => res.json({ documents }))
+router.get("/", requireAuth, async (_req, res) => res.json({ documents: await listDocuments() }))
 
 export default router

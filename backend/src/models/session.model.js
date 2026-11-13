@@ -6,28 +6,28 @@ const hashToken = (token) => createHash("sha256").update(token).digest("hex")
 const validToken = (token) =>
   typeof token === "string" && /^[a-f0-9]{64}$/.test(token)
 
-const insert = db.prepare(
-  "INSERT INTO sessions (token_hash, account_id, expires_at) VALUES (?, ?, ?)",
-)
-const find = db.prepare(
-  "SELECT account_id FROM sessions WHERE token_hash = ? AND expires_at > ?",
-)
-const remove = db.prepare("DELETE FROM sessions WHERE token_hash = ?")
-const removeExpired = db.prepare("DELETE FROM sessions WHERE expires_at <= ?")
-
-export function createSession(accountId) {
+export async function createSession(accountId) {
   const token = randomBytes(32).toString("hex")
   const now = Date.now()
-  removeExpired.run(now)
-  insert.run(hashToken(token), accountId, now + sessionMaxAge)
+  await db.execute("DELETE FROM sessions WHERE expires_at <= ?", [now])
+  await db.execute(
+    "INSERT INTO sessions (token_hash, account_id, expires_at) VALUES (?, ?, ?)",
+    [hashToken(token), accountId, now + sessionMaxAge],
+  )
   return token
 }
 
-export function findSessionAccount(token) {
+export async function findSessionAccount(token) {
   if (!validToken(token)) return null
-  return find.get(hashToken(token), Date.now())?.account_id ?? null
+  const [rows] = await db.execute(
+    "SELECT account_id FROM sessions WHERE token_hash = ? AND expires_at > ?",
+    [hashToken(token), Date.now()],
+  )
+  return rows[0]?.account_id ?? null
 }
 
-export function deleteSession(token) {
-  if (validToken(token)) remove.run(hashToken(token))
+export async function deleteSession(token) {
+  if (validToken(token)) {
+    await db.execute("DELETE FROM sessions WHERE token_hash = ?", [hashToken(token)])
+  }
 }

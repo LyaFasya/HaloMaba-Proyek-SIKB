@@ -1,0 +1,64 @@
+CREATE TABLE IF NOT EXISTS accounts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(254) NOT NULL UNIQUE,
+  password_hash VARCHAR(161) NOT NULL,
+  full_name VARCHAR(100) NOT NULL,
+  nickname VARCHAR(60) NOT NULL DEFAULT '',
+  program VARCHAR(16) NOT NULL DEFAULT '',
+  cohort VARCHAR(4) NOT NULL DEFAULT '',
+  nim CHAR(15) NULL UNIQUE,
+  CONSTRAINT accounts_nim_format CHECK (nim IS NULL OR nim REGEXP '^[0-9]{15}$')
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+  account_id INT UNSIGNED NOT NULL,
+  expires_at BIGINT UNSIGNED NOT NULL,
+  INDEX sessions_expires_at_idx (expires_at),
+  FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS study_programs (
+  id VARCHAR(16) PRIMARY KEY,
+  code VARCHAR(16) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  department VARCHAR(120) NOT NULL,
+  focus TEXT NOT NULL,
+  topics TEXT NOT NULL,
+  example TEXT NOT NULL,
+  sort_order SMALLINT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS documents (
+  id VARCHAR(48) PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  summary TEXT NOT NULL,
+  keywords JSON NOT NULL,
+  drive_id VARCHAR(120) NOT NULL,
+  filename VARCHAR(255) NOT NULL,
+  bytes INT UNSIGNED NOT NULL,
+  sort_order SMALLINT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS checkpoints (
+  id VARCHAR(32) PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  intro TEXT NOT NULL,
+  steps JSON NOT NULL,
+  done TEXT NOT NULL,
+  keywords JSON NOT NULL,
+  document_ids JSON NOT NULL,
+  phase_name VARCHAR(120) NOT NULL,
+  phase_order SMALLINT UNSIGNED NOT NULL,
+  sort_order SMALLINT UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS progress (
+  account_id INT UNSIGNED NOT NULL,
+  checkpoint_id VARCHAR(32) NOT NULL,
+  checked TINYINT UNSIGNED NOT NULL CHECK (checked IN (0, 1)),
+  PRIMARY KEY (account_id, checkpoint_id),
+  FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+  CONSTRAINT progress_checkpoint_fk FOREIGN KEY (checkpoint_id) REFERENCES checkpoints(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
